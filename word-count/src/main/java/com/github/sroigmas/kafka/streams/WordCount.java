@@ -10,7 +10,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Named;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
 public class WordCount {
@@ -31,7 +31,7 @@ public class WordCount {
         .flatMapValues(value -> Arrays.asList(value.split(" ")))
         .selectKey((key, value) -> value)
         .groupByKey()
-        .count(Named.as("Counts"));
+        .count(Materialized.as("Counts"));
 
     wordCounts.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
 
