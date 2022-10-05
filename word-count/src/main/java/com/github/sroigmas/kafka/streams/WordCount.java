@@ -23,6 +23,16 @@ public class WordCount {
     properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
     properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
+    Topology topology = createTopology();
+    KafkaStreams streams = new KafkaStreams(topology, properties);
+    streams.start();
+
+    System.out.println(topology.describe());
+
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
+
+  public static Topology createTopology() {
     String topic = "word-count-input";
     StreamsBuilder builder = new StreamsBuilder();
     KStream<String, String> stream = builder.stream(topic);
@@ -35,12 +45,6 @@ public class WordCount {
 
     wordCounts.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
 
-    Topology topology = builder.build();
-    KafkaStreams streams = new KafkaStreams(topology, properties);
-    streams.start();
-
-    System.out.println(topology.describe());
-
-    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+    return builder.build();
   }
 }
